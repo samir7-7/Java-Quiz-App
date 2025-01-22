@@ -49,6 +49,7 @@ startBtn.addEventListener("click", () => {
   index = 0;
   correct = 0;
   loadQuestion();
+  document.querySelector(".question-selector").style.display = "none";
   quizEl.style.display = "block";
 });
 

@@ -4,6 +4,9 @@ body {
     background: linear-gradient(to bottom, #e68a12 0%, #527c96 100%);
     color: #333;
     overflow: hidden;
+    display: flex;
+    justify-content: center;
+    padding: auto;
   }
 
   .main {
@@ -23,6 +26,7 @@ body {
     overflow: hidden;
     padding: 20px;
     text-align: center;
+    width: 70%;
   }
 
   .title {
@@ -80,3 +84,9 @@ body {
     background-color: #f8d7da;
     border-color: #dc3545;
   }
+
+  @media (min-width: 1024px) and (max-width: 1440px) {
+    .container {
+        width: 30%; 
+    }
+}
