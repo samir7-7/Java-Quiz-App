@@ -652,7 +652,7 @@ submitBtn.addEventListener("click", () => {
     } else {
       quizEl.innerHTML = `<div class="col"><h3>You scored ${correct} / ${selectedCount}</h3></div>`;
     }
-  }, 1500);
+  }, 700);
 });
 
 const loadQuestion = () => {
