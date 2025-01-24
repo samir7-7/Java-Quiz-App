@@ -1693,6 +1693,14 @@ submitBtn.addEventListener("click", () => {
   }, 700);
 });
 
+const shuffleArray = (array) => {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+};
+
 const loadQuestion = () => {
   reset();
   const data = quizData[index];
@@ -1735,18 +1743,14 @@ const showResults = () => {
         <div class="wrong-question">
           <h4>${i + 1}) ${q.question}</h4>
           <ul>
-            <li ${q.chosen === "a" ? 'style="color: red;"' : ""}>A. ${
-        q.options.a
-      }</li>
-            <li ${q.chosen === "b" ? 'style="color: red;"' : ""}>B. ${
-        q.options.b
-      }</li>
-            <li ${q.chosen === "c" ? 'style="color: red;"' : ""}>C. ${
-        q.options.c
-      }</li>
-            <li ${q.chosen === "d" ? 'style="color: red;"' : ""}>D. ${
-        q.options.d
-      }</li>
+            <li ${q.chosen === "a" ? 'style="color: red;"' : ""}>A. ${q.options.a
+        }</li>
+            <li ${q.chosen === "b" ? 'style="color: red;"' : ""}>B. ${q.options.b
+        }</li>
+            <li ${q.chosen === "c" ? 'style="color: red;"' : ""}>C. ${q.options.c
+        }</li>
+            <li ${q.chosen === "d" ? 'style="color: red;"' : ""}>D. ${q.options.d
+        }</li>
           </ul>
           <p style="color: green;">Correct Answer: ${q.correct.toUpperCase()}</p>
         </div>
