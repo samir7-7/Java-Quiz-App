@@ -88,7 +88,7 @@ body {
 .wrong-question {
   background-color: #f1f0f0;
   border: 1px solid gray;
-  width: 50%;
+  width: 100%;
   justify-self: center;
   padding: 10px, 20px;
   border-radius: 5px;
