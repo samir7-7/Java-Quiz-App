@@ -1640,97 +1640,120 @@ let index = 0;
 let correct = 0;
 let selectedCount = 1;
 let total = quizData.length;
-let wrongQuestions = []; // Array to store wrong questions
+let wrongQuestions = [];
+let usedQuestionIndices = [];
+let currentQuestionIndex = null;
+
+const getRandomUnusedQuestion = () => {
+    let availableIndices = Array.from(Array(quizData.length).keys())
+        .filter(i => !usedQuestionIndices.includes(i));
+    
+    if (availableIndices.length === 0) return null;
+    
+    const randomIndex = Math.floor(Math.random() * availableIndices.length);
+    const selectedIndex = availableIndices[randomIndex];
+    usedQuestionIndices.push(selectedIndex);
+    return selectedIndex;
+};
 
 startBtn.addEventListener("click", () => {
-  selectedCount = Math.min(Number(numQuestionsInput.value), total);
-  index = 0;
-  correct = 0;
-  wrongQuestions = [];
-  loadQuestion();
-  document.querySelector(".question-selector").style.display = "none";
-  quizEl.style.display = "block";
+    usedQuestionIndices = [];
+    index = 0;
+    correct = 0;
+    selectedCount = Math.min(Number(numQuestionsInput.value), quizData.length);
+    wrongQuestions = [];
+    currentQuestionIndex = getRandomUnusedQuestion();
+    loadQuestion();
+    document.querySelector(".question-selector").style.display = "none";
+    quizEl.style.display = "block";
 });
 
 submitBtn.addEventListener("click", () => {
-  const ans = getAnswer();
-  if (!ans) return alert("Please select an answer!");
+    const answers = getAnswers();
+    if (answers.length === 0) return alert("Please select at least one answer!");
 
-  const data = quizData[index];
-  const options = document.querySelectorAll(".box");
+    const data = quizData[currentQuestionIndex];
+    const options = document.querySelectorAll(".box");
 
-  options.forEach((option) => {
-    if (option.querySelector("input").value === data.correct) {
-      option.classList.add("correct");
-    } else if (option.querySelector("input").checked) {
-      option.classList.add("wrong");
-    }
-  });
-
-  if (ans !== data.correct) {
-    wrongQuestions.push({
-      question: data.question,
-      chosen: ans,
-      correct: data.correct,
-      options: {
-        a: data.a,
-        b: data.b,
-        c: data.c,
-        d: data.d,
-      },
+    options.forEach((option) => {
+        const input = option.querySelector("input");
+        if (data.correct.includes(input.value)) {
+            option.classList.add("correct");
+        } else if (answers.includes(input.value)) {
+            option.classList.add("wrong");
+        }
     });
-  } else {
-    correct++;
-  }
 
-  setTimeout(() => {
-    index++;
-    if (index < selectedCount) {
-      loadQuestion();
+    const isCorrect = answers.every(ans => data.correct.includes(ans)) && 
+                     answers.length === data.correct.length;
+    
+    if (!isCorrect) {
+        wrongQuestions.push({
+            question: data.question,
+            userAnswer: answers,
+            correctAnswer: data.correct,
+            options: {a: data.a, b: data.b, c: data.c, d: data.d}
+        });
     } else {
-      showResults();
+        correct++;
     }
-  }, 700);
+
+    setTimeout(() => {
+        index++;
+        if (index < selectedCount) {
+            currentQuestionIndex = getRandomUnusedQuestion();
+            loadQuestion();
+        } else {
+            showResults();
+        }
+    }, 700);
 });
 
-const shuffleArray = (array) => {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
+const getAnswers = () => {
+    const answers = [];
+    document.querySelectorAll("input[type='checkbox']").forEach((input) => {
+        if (input.checked) answers.push(input.value);
+    });
+    return answers;
 };
 
 const loadQuestion = () => {
-  reset();
-  const data = quizData[index];
-  questionBox.innerHTML = `${index + 1}) ${data.question}`;
-  const options = document.querySelectorAll(".box");
-  options[0].querySelector("label").innerText = data.a;
-  options[1].querySelector("label").innerText = data.b;
-  options[2].querySelector("label").innerText = data.c;
-  options[3].querySelector("label").innerText = data.d;
-  options.forEach((option) => {
-    option.classList.remove("correct", "wrong");
-  });
-};
-
-const getAnswer = () => {
-  let ans;
-  document.querySelectorAll("input[type='radio']").forEach((input) => {
-    if (input.checked) ans = input.value;
-  });
-  return ans;
+    if (currentQuestionIndex === null) {
+        showResults();
+        return;
+    }
+    
+    reset();
+    const data = quizData[currentQuestionIndex];
+    questionBox.innerHTML = `${index + 1}) ${data.question}`;
+    const options = document.querySelectorAll(".box");
+    
+    options.forEach((option, i) => {
+        const input = option.querySelector("input");
+        input.type = "checkbox";
+        option.classList.remove("correct", "wrong");
+        option.querySelector("label").innerText = data[Object.keys(data)[i + 1]];
+    });
 };
 
 const reset = () => {
-  document.querySelectorAll("input[type='radio']").forEach((input) => {
-    input.checked = false;
+
+  document.querySelectorAll("input[type='checkbox']").forEach((input) => {
+      input.checked = false;
+  });
+
+
+  document.querySelectorAll(".box").forEach((box) => {
+      box.classList.remove("correct", "wrong");
   });
 };
 
 const showResults = () => {
-  quizEl.innerHTML = `<div class="col"><h3>You scored ${correct} / ${selectedCount}</h3></div>`;
+  quizEl.innerHTML = `
+    <div class="col">
+      <h3>You scored ${correct} / ${selectedCount}</h3>
+    </div>
+  `;
 
   if (wrongQuestions.length > 0) {
     if (wrongQuestions.length > 5) {
@@ -1739,20 +1762,28 @@ const showResults = () => {
         .setAttribute("style", "position: relative; top: 103%");
     }
     wrongQuestions.forEach((q, i) => {
+      // Convert correctAnswer to array if it's not already
+      const correctAnswers = Array.isArray(q.correctAnswer) ? 
+                           q.correctAnswer : [q.correctAnswer];
+      
       const wrongHtml = `
         <div class="wrong-question">
           <h4>${i + 1}) ${q.question}</h4>
           <ul>
-            <li ${q.chosen === "a" ? 'style="color: red;"' : ""}>A. ${q.options.a
-        }</li>
-            <li ${q.chosen === "b" ? 'style="color: red;"' : ""}>B. ${q.options.b
-        }</li>
-            <li ${q.chosen === "c" ? 'style="color: red;"' : ""}>C. ${q.options.c
-        }</li>
-            <li ${q.chosen === "d" ? 'style="color: red;"' : ""}>D. ${q.options.d
-        }</li>
+            <li ${q.userAnswer.includes('a') ? 'style="color: red;"' : ""}>
+              A. ${q.options.a}
+            </li>
+            <li ${q.userAnswer.includes('b') ? 'style="color: red;"' : ""}>
+              B. ${q.options.b}
+            </li>
+            <li ${q.userAnswer.includes('c') ? 'style="color: red;"' : ""}>
+              C. ${q.options.c}
+            </li>
+            <li ${q.userAnswer.includes('d') ? 'style="color: red;"' : ""}>
+              D. ${q.options.d}
+            </li>
           </ul>
-          <p style="color: green;">Correct Answer: ${q.correct.toUpperCase()}</p>
+          <p style="color: green;">Correct Answer(s): ${correctAnswers.map(ans => ans.toUpperCase()).join(', ')}</p>
         </div>
       `;
       quizEl.innerHTML += wrongHtml;

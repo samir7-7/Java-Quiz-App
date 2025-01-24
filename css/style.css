@@ -2,6 +2,7 @@ body {
   font-family: "Poppins", sans-serif;
   margin: 0;
   background: linear-gradient(to bottom, #e68a12 0%, #527c96 100%);
+  background-attachment: fixed;
   color: #333;
   display: flex;
   justify-content: center;
@@ -103,8 +104,8 @@ body {
   gap: 5px;
 }
 
-@media (min-width: 1024px) and (max-width: 1440px) {
+@media (max-width: 720px) {
   .container {
-    width: 30%;
+    width: 95vw;
   }
 }
