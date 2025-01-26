@@ -124,10 +124,10 @@ const showResults = () => {
   `;
 
   if (wrongQuestions.length > 0) {
-    if (wrongQuestions.length > 5) {
+    if (wrongQuestions.length >= 5) {
       document
         .querySelector(".container")
-        .setAttribute("style", "position: relative; top: 103%");
+        .setAttribute("style", "position: relative; top: 101%");
     }
     wrongQuestions.forEach((q, i) => {
       // Convert correctAnswer to array if it's not already
