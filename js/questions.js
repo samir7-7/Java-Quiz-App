@@ -1,4 +1,4 @@
-const quizData = [
+quizData = [
   {
     question:
       "Which of the following is a way to write a single-line comment in Java?",
